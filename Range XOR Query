@@ -1,0 +1,57 @@
+class Solution {
+public:
+     int Query(int qs,int qe,vector<int> &st,int start,int end, int start_index)
+    {
+        if (qs>end or qe<start) //No Overlap
+        { 
+            return -1;
+        }
+        if (qs<=start && qe>=end)
+        { 
+            return st[start_index];
+        }
+        // partial overlap
+        int middle=start+(end-start)/2;
+        int leftsum=Query(qs,qe,st,start,middle,2*start_index+1);
+        int rightsum=Query(qs,qe,st,middle+1,end,2*start_index+2);
+        
+        if(leftsum==-1)  return rightsum;
+        if(rightsum==-1) return leftsum;
+        
+        return leftsum^rightsum;
+    }
+     int buildTree(vector<int> &arr,vector<int> &st,int start_index, int start, int end)
+     {
+       
+        if (start==end)
+        {
+            st[start_index] =arr[start]; 
+            return st[start_index];
+        }
+        int mid = (start+end)/2;
+        st[start_index]=(buildTree(arr,st, 2*start_index+1,start, mid))^(buildTree(arr,st, 2*start_index+2, mid+1,end));
+         
+        return st[start_index];
+    }
+    
+    
+    vector<int> xorQueries(vector<int>& arr, vector<vector<int>>& queries) 
+    {
+        int n = arr.size();
+        vector<int> st(4*n+1, 0);//Maximum size of a segment tree for an array of size n is 4n
+           
+        buildTree(arr,st,0, 0, n-1);
+
+        vector<int> ans;
+        
+        for(auto i:queries)
+        {
+        int qs = i[0];
+        int qe = i[1];
+
+        int result =Query(qs,qe,st,0,n-1,0);
+        ans.push_back(result);
+    }
+        return ans;
+    }
+};
